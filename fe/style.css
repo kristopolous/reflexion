@@ -467,7 +467,7 @@ body {
   margin-bottom: 1rem;
 }
 
-.url-input input {
+.url-input input, input[type="text"] {
   flex: 1;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-color);
@@ -477,7 +477,7 @@ body {
   font-size: 0.9rem;
 }
 
-.url-input input:focus {
+.url-input input, input[type="text"]:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);

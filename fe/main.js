@@ -33,6 +33,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   
   const analyzeBtn = document.getElementById('analyzeBtn');
+  analyzeBtn.addEventListener('click', async () => {
+    const brandUrlInput = document.getElementById('brandUrl');
+    const url = brandUrlInput.value;
+
+    try {
+      const response = await fetch(`/scrape_and_refine?url=${url}`);
+      if (response.ok) {
+        const data = await response.json();
+        brandUrlInput.value = data.prompt;
+      } else {
+        console.error('Error:', response.status);
+        alert('Failed to analyze URL.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to analyze URL.');
+    }
+  });
+
   generateBtn.addEventListener('click', async () => {
     loadingOverlay.style.display = 'flex';
     loadingText.textContent = 'Generating creatives...';

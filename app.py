@@ -4,7 +4,8 @@ import requests
 import os
 import uuid
 from flask_cors import CORS
-from markitdown import MarkItDown
+from urllib.parse import urlparse
+
 import litellm
 from bs4 import BeautifulSoup
 
@@ -82,14 +83,148 @@ def generate_variants(base_image, resolution, prompt="A fantastic image"):
         }
 
 def scrape_brand_tone(url):
+    # TODO: Implement crawlee logic here
+    return "Crawlee implementation needed"
+    
+
+def extract_with_markitdown(url):
+    """Extract content using Microsoft's markitdown"""
     try:
-        response = requests.get(url)
-        response.raise_for_status()
-        md = MarkItDown(response.text)
-        return md
+        from markitdown import MarkItDown
+        
+        md = MarkItDown()
+        result = md.convert_url(url)
+        
+        # Extract title from the first heading or use filename
+        title = "No title found"
+        lines = result.text_content.split('\n')
+        for line in lines:
+            line = line.strip()
+            if line.startswith('# '):
+                title = line[2:].strip()
+                break
+            elif line and not line.startswith('*') and len(line) > 10:
+                # Use first substantial line as title
+                title = line[:100] + "..." if len(line) > 100 else line
+                break
+        
+        return {
+            'success': True,
+            'title': title,
+            'content': result.text_content.strip(),
+            'url': url,
+            'method': 'markitdown'
+        }
+        
+    except ImportError:
+        raise Exception("markitdown not installed. Install with: pip install markitdown")
     except Exception as e:
-        print(f"Error scraping URL: {e}")
-        return ""
+        raise Exception(f"markitdown extraction failed: {str(e)}")
+
+async def extract_with_crawlee(url):
+    """Extract content using Crawlee"""
+    try:
+        from crawlee.playwright_crawler import PlaywrightCrawler, PlaywrightCrawlingContext
+        
+        extracted_data = {}
+        
+        async def handler(context: PlaywrightCrawlingContext) -> None:
+            page = context.page
+            
+            # Wait for page to load
+            await page.wait_for_load_state('networkidle')
+            
+            # Extract title
+            title = await page.title()
+            
+            # Try to find main content using common selectors
+            content_selectors = [
+                'article',
+                '[role="main"]',
+                'main',
+                '.post-content',
+                '.entry-content',
+                '.content',
+                '.article-content',
+                '.post-body'
+            ]
+            
+            content = ""
+            for selector in content_selectors:
+                try:
+                    element = await page.query_selector(selector)
+                    if element:
+                        content = await element.inner_text()
+                        if content and len(content.strip()) > 100:
+                            break
+                except:
+                    continue
+            
+            # Fallback to body if no main content found
+            if not content or len(content.strip()) < 100:
+                body = await page.query_selector('body')
+                if body:
+                    content = await body.inner_text()
+            
+            # Clean up content
+            content = '\n'.join(line.strip() for line in content.split('\n') if line.strip())
+            
+            extracted_data['title'] = title or "No title found"
+            extracted_data['content'] = content
+            extracted_data['url'] = url
+            extracted_data['method'] = 'crawlee'
+        
+        # Create crawler
+        crawler = PlaywrightCrawler(
+            request_handler=handler,
+            headless=True,
+            max_requests_per_crawl=1
+        )
+        
+        # Run crawler
+        await crawler.run([url])
+        
+        if not extracted_data:
+            raise Exception("No data extracted")
+        
+        return {
+            'success': True,
+            **extracted_data
+        }
+        
+    except ImportError:
+        raise Exception("crawlee not installed. Install with: pip install crawlee[playwright]")
+    except Exception as e:
+        raise Exception(f"crawlee extraction failed: {str(e)}")
+
+def extract_content(url):
+    """Main extraction function that tries multiple methods"""
+    
+    # Validate URL
+    parsed_url = urlparse(url)
+    if not parsed_url.scheme or not parsed_url.netloc:
+        return {'success': False, 'error': 'Invalid URL format'}
+    
+    # Try markitdown first (faster and cleaner for most content)
+    try:
+        return extract_with_markitdown(url)
+    except Exception as markitdown_error:
+        print(f"markitdown failed: {markitdown_error}")
+        
+        # Try crawlee as fallback (better for complex JS sites)
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            result = loop.run_until_complete(extract_with_crawlee(url))
+            loop.close()
+            return result
+        except Exception as crawlee_error:
+            print(f"crawlee failed: {crawlee_error}")
+            
+            return {
+                'success': False, 
+                'error': f'Both extraction methods failed. markitdown: {str(markitdown_error)}, crawlee: {str(crawlee_error)}'
+            }
 
 @app.route('/scrape_and_refine')
 def scrape_and_refine():
@@ -98,15 +233,16 @@ def scrape_and_refine():
         return jsonify({"error": "Missing URL parameter"}), 400
     
     try:
-        scraped_content = scrape_brand_tone(url)
-        if not scraped_content:
-            return jsonify({"error": "Failed to scrape content from URL"}), 500
-
+        scraped_content = extract_content(url)
+        
         # Refine the prompt using LiteLLM
-        messages = [{"role": "system", "content": "You are a marketing expert.  Create a short prompt (max 20 words) to generate an image that reflects the brand in the following text:"},
-                    {"role": "user", "content": scraped_content}]
+        messages = [{"role": "system", "content": "You are a marketing expert.  Create a short image generation prompt to generate an image relevant to the following blog post:"},
+                    {"role": "user", "content": scraped_content['content']}]
         try:
-            response = litellm.completion(model="openrouter/google/gemini-2.0-flash-exp:free", messages=messages, api_key=OPENROUTER_API_KEY)
+            response = litellm.completion(
+                model="openrouter/google/gemini-2.0-flash-exp:free", 
+                messages=messages, 
+                api_key=OPENROUTER_API_KEY)
             refined_prompt = response.choices[0].message.content
         except Exception as e:
             refined_prompt = f"Error generating refined prompt: {e}"
@@ -114,6 +250,23 @@ def scrape_and_refine():
         return jsonify({"prompt": refined_prompt})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+  
+@app.route('/api/extract')
+def api_extract():
+    """Extract content from URL via GET"""
+    url = request.args.get('url')
+    
+    if not url:
+        return jsonify({'success': False, 'error': 'URL parameter is required'})
+    
+    try:
+        result = extract_content(url)
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
 
 @app.route('/generate', methods=['POST'])
 def generate():
@@ -133,4 +286,4 @@ def generate():
 
 if __name__ == '__main__':
     os.makedirs("images", exist_ok=True)
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5000) 

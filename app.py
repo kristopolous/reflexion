@@ -51,8 +51,9 @@ def generate_variants(base_image, resolution, prompt):
         'safety_tolerance': 2
     }
     try:
-        imgStack = []
-        for asp in "1:1", "16:9", "9:16":
+        res= {}
+        services = [("Facebook", "1:1"), ("Instagram","16:9"), ("TikTok", "9:16")]
+        for service, asp in services:
             data['aspect_ratio'] = asp
             response = requests.post(BFL_API_URL, headers=headers, json=data)
             response.raise_for_status()
@@ -88,13 +89,9 @@ def generate_variants(base_image, resolution, prompt):
                 f.write(img_resp.content)
 
             image_url = f"/images/{image_id}"
-            imgStack.append(image_url)
+            res[service] = {'url': image_url, 'format': 'story', 'description': f'{service} ad'}
 
-        return {
-            'Facebook': {'url': imgStack[0], 'format': 'story', 'description': 'Facebook ad'},
-            'Instagram': {'url': imgStack[1], 'format': 'reel', 'description': 'Instagram ad'},
-            'TikTok': {'url': imgStack[2], 'format': 'video', 'description': 'TikTok ad'}
-        }
+        return res
 
     except requests.exceptions.RequestException as e:
         print(f"Error calling BFL API: {e}")
@@ -287,6 +284,17 @@ def api_extract():
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+
+def fetch_and_encode_image_url(url):
+    print(url)
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return base64.b64encode(response.content).decode('utf-8')
+    except Exception as e:
+        print(f"Failed to fetch image from URL: {e}")
+        return None
+    
 def encode_image_to_data_uri(image_file):
     # Read the file into memory
     image_bytes = image_file.read()
@@ -302,16 +310,21 @@ def generate():
     base_image = request.files.get('image')
     if base_image:
         base_image = encode_image_to_data_uri(base_image)
+    else:
+        base_image = fetch_and_encode_image_url(data.get('image_url'))
+
     resolution = data.get('resolution', '512x512')
     context = data.get('context')
-    prompt = data.get('prompt', "A fantastic image")
+    modify = data.get('prompt')
     ageRange = data.get('ageRange', '18-35')
     gender = data.get('gender', 'any')
     location = data.get('location', 'USA')
     interests = data.get('interests', 'any')
     freeformText = data.get('freeformText', '')
     prompt = f"{context} involving a person from or content culturally relevant to {location} {gender} gender, {interests} interests and {ageRange} years old. {freeformText}"
-
+    if modify:
+        prompt += f"Important: Modify the image as follows: {modify}"
+    
     variants = generate_variants(base_image, resolution, prompt)
     print(prompt)
     return jsonify({

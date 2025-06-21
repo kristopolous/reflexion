@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const creativeGrid = document.getElementById('creativeGrid');
   const loadingOverlay = document.getElementById('loadingOverlay');
   const loadingText = document.getElementById('loadingText');
+  let imgurl = '';
 
   uploadArea.addEventListener('click', () => imageInput.click());
 
@@ -55,8 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function getFormData() {
     const formData = new FormData();
-    const imageFile = imageInput.files[0];
-    formData.append('image', imageFile);
     formData.append("context", analyzeText.value);
     
     // Add target demographics
@@ -78,6 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadingText.textContent = 'Generating creatives...';
 
     const formData = getFormData();
+    const imageFile = imageInput.files[0];
+    formData.append('image', imageFile);
+
     try {
       const response = await fetch('http://localhost:5000/generate', {
         method: 'POST',
@@ -94,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
       creativeGrid.innerHTML = '';
       if (data.media_kit) {
         Object.entries(data.media_kit).forEach(([platform, item]) => {
+          console.log(platform, item);
           const container = document.createElement('div');
           container.classList.add('creative-container');
 
@@ -106,16 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
           img.alt = item.description;
           img.style.maxWidth = '100%';
           img.style.height = 'auto';
+          imgurl = img.src;
 
           container.appendChild(img);
-
-          // Set aspect ratio based on platform
-          if (item.format === 'story' || item.format === 'reel') {
-            container.style.maxWidth = '200px'; // Adjust as needed
-          } else {
-            container.style.maxWidth = '200px'; // Adjust as needed
-          }
-
+          
           creativeGrid.appendChild(container);
         });
       } else {
@@ -134,13 +131,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('modifyBtn').addEventListener('click', async () => {
     const modifyPrompt = document.getElementById('modifyPrompt').value;
-    const imageFile = imageInput.files[0];
+    
 
     loadingOverlay.style.display = 'flex';
     loadingText.textContent = 'Modifying image...';
 
     let formData = getFormData();
     formData.append('prompt', modifyPrompt);
+    formData.append('image_url',imgurl);
 
     try {
       const response = await fetch('http://localhost:5000/generate', {
@@ -173,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
           container.appendChild(img);
 
-   
           creativeGrid.appendChild(container);
         });
       } else {

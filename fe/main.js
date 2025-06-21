@@ -31,12 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
     previewImg.src = '';
   });
 
+  
+  const analyzeBtn = document.getElementById('analyzeBtn');
   generateBtn.addEventListener('click', async () => {
     loadingOverlay.style.display = 'flex';
     loadingText.textContent = 'Generating creatives...';
 
     const imageFile = imageInput.files[0];
-    const prompt = document.getElementById('brandUrl').value;
+    let prompt = document.getElementById('brandUrl').value;
     const freeformText = document.getElementById('freeformText').value;
     const interests = Array.from(document.querySelectorAll('.interest-tag.active'))
         .map(el => el.dataset.interest)
@@ -48,9 +50,24 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    let refinedPrompt = prompt + " " + freeformText + " Interests: " + interests;
+    
+    try {
+      const refinedPromptResponse = await fetch(`/scrape_and_refine?url=${prompt}`);
+      if (refinedPromptResponse.ok) {
+        const refinedPromptData = await refinedPromptResponse.json();
+        refinedPrompt = refinedPromptData.prompt;
+        document.getElementById('brandUrl').value = refinedPrompt;
+      } else {
+        console.warn("Failed to get refined prompt, using original URL");
+      }
+    } catch (error) {
+      console.error("Error getting refined prompt:", error);
+    }
+
     const formData = new FormData();
     formData.append('image', imageFile);
-    formData.append('prompt', prompt + " " + freeformText + " Interests: " + interests); // Use URL for brand context
+    formData.append('prompt', refinedPrompt);
 
     try {
       const response = await fetch('http://localhost:5000/generate', {
@@ -70,6 +87,10 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.entries(data.media_kit).forEach(([platform, item]) => {
           const container = document.createElement('div');
           container.classList.add('creative-container');
+
+          const label = document.createElement('h4');
+          label.textContent = platform;
+          container.appendChild(label);
 
           const img = document.createElement('img');
           img.src = item.url;
@@ -135,6 +156,10 @@ document.addEventListener('DOMContentLoaded', () => {
         Object.entries(data.media_kit).forEach(([platform, item]) => {
           const container = document.createElement('div');
           container.classList.add('creative-container');
+
+          const label = document.createElement('h4');
+          label.textContent = platform;
+          container.appendChild(label);
 
           const img = document.createElement('img');
           img.src = item.url;

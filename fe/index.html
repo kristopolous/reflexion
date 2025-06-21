@@ -91,10 +91,6 @@
             <!-- Brand Analysis -->
             <div class="input-card">
               <h3>Brand Context</h3>
-              <div class="brand-input-tabs">
-                <button class="tab-btn active" data-tab="url">Website</button>
-                <button class="tab-btn" data-tab="blog">Blog/Platform</button>
-              </div>
               
               <div class="tab-content active" id="url-tab">
                 <div class="url-input">
@@ -118,7 +114,6 @@
                   <button class="import-btn" id="importBtn">Import Content</button>
                 </div>
               </div>
-              
               <div class="brand-insights" id="brandInsights" style="display: none;">
                 <div class="insight-item">
                   <span class="insight-label">Tone:</span>
@@ -249,9 +244,9 @@
             <!-- Generated creatives will be inserted here -->
           </div>
           
-          <div class="modify-section">
+          <div class="modify-section input-card">
             <h3>Modify Image</h3>
-            <input type="text" id="modifyPrompt" placeholder="Enter prompt to modify the image">
+            <input type="text" id="modifyPrompt" placeholder="Enter prompt to modify the image" class="url-input input">
             <button class="modify-btn" id="modifyBtn">Modify</button>
           </div>
         </section>

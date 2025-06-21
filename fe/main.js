@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
           container.appendChild(label);
 
           const img = document.createElement('img');
-          img.src = item.url;
+          img.src = item.url.slice(1);
           img.alt = item.description;
           img.style.maxWidth = '100%';
           img.style.height = 'auto';

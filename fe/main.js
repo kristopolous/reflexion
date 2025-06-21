@@ -37,6 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const imageFile = imageInput.files[0];
     const prompt = document.getElementById('brandUrl').value;
+    const freeformText = document.getElementById('freeformText').value;
+    const interests = Array.from(document.querySelectorAll('.interest-tag.active'))
+        .map(el => el.dataset.interest)
+        .join(', ');
 
     if (!imageFile) {
       alert('Please upload an image.');
@@ -46,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const formData = new FormData();
     formData.append('image', imageFile);
-    formData.append('prompt', prompt); // Use URL for brand context
+    formData.append('prompt', prompt + " " + freeformText + " Interests: " + interests); // Use URL for brand context
 
     try {
       const response = await fetch('http://localhost:5000/generate', {
@@ -63,11 +67,91 @@ document.addEventListener('DOMContentLoaded', () => {
 
       creativeGrid.innerHTML = '';
       if (data.media_kit) {
-        Object.values(data.media_kit).forEach(item => {
+        Object.entries(data.media_kit).forEach(([platform, item]) => {
+          const container = document.createElement('div');
+          container.classList.add('creative-container');
+
           const img = document.createElement('img');
           img.src = item.url;
           img.alt = item.description;
-          creativeGrid.appendChild(img);
+          img.style.maxWidth = '100%';
+          img.style.height = 'auto';
+
+          container.appendChild(img);
+
+          // Set aspect ratio based on platform
+          if (item.format === 'story' || item.format === 'reel') {
+            container.style.maxWidth = '200px'; // Adjust as needed
+          } else {
+            container.style.maxWidth = '200px'; // Adjust as needed
+          }
+
+          creativeGrid.appendChild(container);
+        });
+      } else {
+        creativeGrid.textContent = "Failed to generate creatives.";
+      }
+
+      resultsSection.style.display = 'block';
+      loadingOverlay.style.display = 'none';
+
+    } catch (error) {
+      console.error('Error:', error);
+      loadingText.textContent = 'Error generating creatives.';
+    }
+  });
+
+  document.getElementById('modifyBtn').addEventListener('click', async () => {
+    const modifyPrompt = document.getElementById('modifyPrompt').value;
+    const imageFile = imageInput.files[0];
+
+    if (!imageFile) {
+      alert('Please upload an image first.');
+      return;
+    }
+
+    loadingOverlay.style.display = 'flex';
+    loadingText.textContent = 'Modifying image...';
+
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    formData.append('prompt', modifyPrompt);
+
+    try {
+      const response = await fetch('http://localhost:5000/generate', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      creativeGrid.innerHTML = '';
+      if (data.media_kit) {
+        Object.entries(data.media_kit).forEach(([platform, item]) => {
+          const container = document.createElement('div');
+          container.classList.add('creative-container');
+
+          const img = document.createElement('img');
+          img.src = item.url;
+          img.alt = item.description;
+          img.style.maxWidth = '100%';
+          img.style.height = 'auto';
+
+          container.appendChild(img);
+
+          // Set aspect ratio based on platform
+          if (item.format === 'story' || item.format === 'reel') {
+            container.style.maxWidth = '200px'; // Adjust as needed
+          } else {
+            container.style.maxWidth = '200px'; // Adjust as needed
+          }
+
+          creativeGrid.appendChild(container);
         });
       } else {
         creativeGrid.textContent = "Failed to generate creatives.";

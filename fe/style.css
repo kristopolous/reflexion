@@ -223,12 +223,14 @@ body {
   font-weight: 500;
 }
 
-.demo-group select {
-  background: rgba(255, 255, 255, 0.05);
+.demo-group select, .demo-group textarea {
+  background: var(--bg-dark);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 0.75rem;
   color: var(--text-primary);
+  /* Force black text in dropdowns */
+  color: white;
   font-size: 0.9rem;
 }
 

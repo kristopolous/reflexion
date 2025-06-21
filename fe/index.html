@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reflexion - AI Creative Generation</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div id="app">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <div class="logo-icon"></div>
+          <h1>REFLEXION</h1>
+        </div>
+        <div class="tagline">AI-Powered Creative Generation</div>
+      </header>
+
+      <!-- Main Interface -->
+      <main class="main-content">
+        <!-- Input Section -->
+        <section class="input-section">
+          <div class="input-grid">
+            <!-- Image Upload -->
+            <div class="input-card">
+              <h3>Base Image</h3>
+              <div class="upload-area" id="uploadArea">
+                <div class="upload-icon"></div>
+                <p>Drop image here or click to select</p>
+                <input type="file" id="imageInput" accept="image/*" hidden>
+              </div>
+              <div class="image-preview" id="imagePreview" style="display: none;">
+                <img id="previewImg" alt="Preview">
+                <button class="remove-btn" id="removeImage">&times;</button>
+              </div>
+            </div>
+
+            <!-- Platform Selection -->
+            <div class="input-card">
+              <h3>Target Platforms</h3>
+              <div class="platform-grid">
+                <label class="platform-option">
+                  <input type="checkbox" name="platform" value="facebook" checked>
+                  <div class="platform-card">
+                    <div class="platform-icon facebook"></div>
+                    <span>Facebook</span>
+                  </div>
+                </label>
+                <label class="platform-option">
+                  <input type="checkbox" name="platform" value="instagram" checked>
+                  <div class="platform-card">
+                    <div class="platform-icon instagram"></div>
+                    <span>Instagram</span>
+                  </div>
+                </label>
+                <label class="platform-option">
+                  <input type="checkbox" name="platform" value="tiktok" checked>
+                  <div class="platform-card">
+                    <div class="platform-icon tiktok"></div>
+                    <span>TikTok</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Format Selection -->
+            <div class="input-card">
+              <h3>Creative Formats</h3>
+              <div class="format-grid">
+                <label class="format-option">
+                  <input type="checkbox" name="format" value="post" checked>
+                  <span>Post (1:1)</span>
+                </label>
+                <label class="format-option">
+                  <input type="checkbox" name="format" value="story" checked>
+                  <span>Story (9:16)</span>
+                </label>
+                <label class="format-option">
+                  <input type="checkbox" name="format" value="banner">
+                  <span>Banner (16:9)</span>
+                </label>
+                <label class="format-option">
+                  <input type="checkbox" name="format" value="reel">
+                  <span>Reel (9:16)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Brand Analysis -->
+            <div class="input-card">
+              <h3>Brand Context</h3>
+              <div class="brand-input-tabs">
+                <button class="tab-btn active" data-tab="url">Website</button>
+                <button class="tab-btn" data-tab="blog">Blog/Platform</button>
+              </div>
+              
+              <div class="tab-content active" id="url-tab">
+                <div class="url-input">
+                  <input type="url" id="brandUrl" placeholder="Enter website URL for brand analysis">
+                  <button class="analyze-btn" id="analyzeBtn">Analyze</button>
+                </div>
+              </div>
+              
+              <div class="tab-content" id="blog-tab">
+                <div class="blog-input">
+                  <select id="platformSelect">
+                    <option value="">Select Platform</option>
+                    <option value="medium">Medium</option>
+                    <option value="substack">Substack</option>
+                    <option value="wordpress">WordPress</option>
+                    <option value="linkedin">LinkedIn</option>
+                    <option value="twitter">Twitter/X</option>
+                    <option value="custom">Custom Blog</option>
+                  </select>
+                  <input type="url" id="blogUrl" placeholder="Enter blog/platform URL">
+                  <button class="import-btn" id="importBtn">Import Content</button>
+                </div>
+              </div>
+              
+              <div class="brand-insights" id="brandInsights" style="display: none;">
+                <div class="insight-item">
+                  <span class="insight-label">Tone:</span>
+                  <span class="insight-value" id="brandTone">Professional</span>
+                </div>
+                <div class="insight-item">
+                  <span class="insight-label">Style:</span>
+                  <span class="insight-value" id="brandStyle">Modern</span>
+                </div>
+                <div class="insight-item">
+                  <span class="insight-label">Colors:</span>
+                  <span class="insight-value" id="brandColors">#2196F3, #FF5722</span>
+                </div>
+                <div class="insight-item">
+                  <span class="insight-label">Voice:</span>
+                  <span class="insight-value" id="brandVoice">Authoritative</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Demographics -->
+            <div class="input-card">
+              <h3>Target Demographics</h3>
+              <div class="demographics-grid">
+                <div class="demo-group">
+                  <label>Age Range</label>
+                  <select id="ageRange">
+                    <option value="18-24">18-24</option>
+                    <option value="25-34" selected>25-34</option>
+                    <option value="35-44">35-44</option>
+                    <option value="45-54">45-54</option>
+                    <option value="55+">55+</option>
+                  </select>
+                </div>
+                
+                <div class="demo-group">
+                  <label>Gender</label>
+                  <select id="gender">
+                    <option value="all" selected>All</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="non-binary">Non-binary</option>
+                  </select>
+                </div>
+                
+                <div class="demo-group">
+                  <label>Interests</label>
+                  <div class="interest-tags">
+                    <span class="interest-tag" data-interest="tech">Tech</span>
+                    <span class="interest-tag" data-interest="fashion">Fashion</span>
+                    <span class="interest-tag" data-interest="fitness">Fitness</span>
+                    <span class="interest-tag" data-interest="travel">Travel</span>
+                    <span class="interest-tag" data-interest="food">Food</span>
+                    <span class="interest-tag" data-interest="gaming">Gaming</span>
+                    <span class="interest-tag" data-interest="business">Business</span>
+                    <span class="interest-tag" data-interest="art">Art</span>
+                  </div>
+                </div>
+                
+                <div class="demo-group">
+                  <label>Location</label>
+                  <select id="location">
+                    <option value="global" selected>Global</option>
+                    <option value="north-america">North America</option>
+                    <option value="europe">Europe</option>
+                    <option value="asia">Asia</option>
+                    <option value="australia">Australia</option>
+                    <option value="south-america">South America</option>
+                    <option value="africa">Africa</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Campaign Objective -->
+            <div class="input-card">
+              <h3>Campaign Objective</h3>
+              <div class="objective-grid">
+                <label class="objective-option">
+                  <input type="radio" name="objective" value="awareness" checked>
+                  <span>Brand Awareness</span>
+                </label>
+                <label class="objective-option">
+                  <input type="radio" name="objective" value="engagement">
+                  <span>Engagement</span>
+                </label>
+                <label class="objective-option">
+                  <input type="radio" name="objective" value="traffic">
+                  <span>Website Traffic</span>
+                </label>
+                <label class="objective-option">
+                  <input type="radio" name="objective" value="conversions">
+                  <span>Conversions</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Generate Button -->
+          <div class="generate-section">
+            <button class="generate-btn" id="generateBtn">
+              <div class="btn-icon"></div>
+              <span>Generate Targeted Creatives</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results-section" id="resultsSection" style="display: none;">
+          <div class="results-header">
+            <h2>Generated Creatives</h2>
+            <div class="results-stats">
+              <span id="resultsCount">0 variants</span>
+              <div class="results-actions">
+                <button class="preview-demographics-btn" id="previewDemographics">Preview Targeting</button>
+                <button class="export-btn" id="exportBtn">Export Media Kit</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Creative Grid -->
+          <div class="creative-grid" id="creativeGrid">
+            <!-- Generated creatives will be inserted here -->
+          </div>
+        </section>
+      </main>
+
+      <!-- Loading Overlay -->
+      <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+          <div class="loading-scanner"></div>
+          <h3>Analyzing & Generating</h3>
+          <p id="loadingText">Processing your image...</p>
+        </div>
+      </div>
+
+      <!-- Modal for Creative Preview -->
+      <div class="modal" id="previewModal" style="display: none;">
+        <div class="modal-content">
+          <button class="modal-close" id="modalClose">&times;</button>
+          <div class="modal-body">
+            <div class="preview-container">
+              <img id="modalImage" alt="Creative Preview">
+            </div>
+            <div class="preview-details">
+              <h3 id="modalTitle">Creative Variant</h3>
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="detail-label">Platform:</span>
+                  <span class="detail-value" id="modalPlatform">Instagram</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Format:</span>
+                  <span class="detail-value" id="modalFormat">Post (1:1)</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Variant:</span>
+                  <span class="detail-value" id="modalVariant">A</span>
+                </div>
+                <div class="detail-item">
+                  <span class="detail-label">Target:</span>
+                  <span class="detail-value" id="modalTarget">25-34, Tech</span>
+                </div>
+              </div>
+              <button class="download-single-btn" id="downloadSingle">Download</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demographics Preview Modal -->
+      <div class="modal" id="demographicsModal" style="display: none;">
+        <div class="modal-content demographics-modal">
+          <button class="modal-close" id="demographicsClose">&times;</button>
+          <div class="demographics-preview">
+            <h3>Targeting Preview</h3>
+            <div class="targeting-summary" id="targetingSummary">
+              <!-- Targeting details will be populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

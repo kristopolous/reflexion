@@ -1,0 +1,29 @@
+[
+  {
+    "demographic": "Urban Professional Women – Southeast Asia",
+    "age": "25–39",
+    "location": ["Bangkok", "Manila", "Jakarta"],
+    "interests": ["Career growth", "fashion", "lifestyle tech", "personal wellness"],
+    "tone": "Polished, optimistic, stylish but efficient",
+    "visual_keywords": ["Clean pastels", "elegant fonts", "workspace + lifestyle merge"],
+    "use_case": "Targeting new DTC productivity app or fashion-tech accessories"
+  },
+  {
+    "demographic": "Retired Conservative Christians – US Midwest",
+    "age": "60–75",
+    "location": ["Iowa", "Indiana", "Ohio"],
+    "interests": ["Family", "faith", "legacy", "small-town values"],
+    "tone": "Respectful, trustworthy, calm",
+    "visual_keywords": ["Warm light", "simple serif fonts", "nature or family imagery"],
+    "use_case": "Campaign for estate planning tools or health supplements"
+  },
+  {
+    "demographic": "Young Digital Creatives – Europe",
+    "age": "18–30",
+    "location": ["Berlin", "Amsterdam", "Barcelona"],
+    "interests": ["AI tools", "experimental art", "sustainability", "meme culture"],
+    "tone": "Irreverent, glitchy, high-contrast with an art-school edge",
+    "visual_keywords": ["Collage", "3D renders", "vaporwave/neon noise"],
+    "use_case": "Reflexion itself, pitched as a tool for remixing and play"
+  }
+]

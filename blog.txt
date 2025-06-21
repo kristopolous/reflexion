@@ -1,0 +1,11 @@
+Title: “Why Color Theory is the Secret Weapon of High-Performing Ads”
+URL: reflexion.ai/blog/color-theory-performance
+
+Excerpt:
+For decades, marketers relied on gut instinct and trend-following. But with modern AI-generated assets, we can optimize color, layout, and contrast on a per-demographic basis. Warm tones work for impulse buys. Cool tones for tech. Contrast drives clickthroughs. These aren’t opinions—they’re patterns extracted from thousands of high-performing campaigns.
+
+In this post, we explore how automated tools like Reflexion create variant-rich visual tests using simple inputs: a product photo, a landing page, or even just a mood. Our color strategy engine isn’t painting by numbers—it’s predicting by pulse.
+
+Visuals on Page:
+- Hero image: Flat-lay of a color wheel with sliced fruit, lipsticks, and circuit boards arranged around it  
+- In-article graphics: Gradient charts, heatmaps of ad clicks, sample A/B ad variants (before/after)

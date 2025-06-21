@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('image', imageFile);
 
     try {
-      const response = await fetch('http://localhost:5000/generate', {
+      const response = await fetch('generate', {
         method: 'POST',
         body: formData
       });
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     formData.append('image_url',imgurl);
 
     try {
-      const response = await fetch('http://localhost:5000/generate', {
+      const response = await fetch('generate', {
         method: 'POST',
         body: formData
       });

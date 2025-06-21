@@ -69,6 +69,20 @@ document.addEventListener('DOMContentLoaded', () => {
         .join(', ');
     formData.append('interests', selectedInterests);
     formData.append('freeformText', document.getElementById('freeformText').value);
+
+    // Add target platforms
+    const platforms = Array.from(document.querySelectorAll('input[name="platform"]:checked'))
+      .map(el => el.value);
+    formData.append('platforms', JSON.stringify(platforms));
+
+    // Add creative formats
+    const formats = Array.from(document.querySelectorAll('input[name="format"]:checked'))
+      .map(el => el.value);
+    formData.append('formats', JSON.stringify(formats));
+
+    // Add campaign objective
+    formData.append('objective', document.querySelector('input[name="objective"]:checked').value);
+
     return formData;
   }
   

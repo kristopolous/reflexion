@@ -29,16 +29,9 @@ def serve_static(path):
 def serve_image(image_id):
     return send_from_directory('images', image_id)
 
-def generate_variants(base_image, resolution, prompt):
+def generate_variants(base_image, platforms, prompt):
     """Generate platform-specific variants using Black Forest Labs API"""
-    aspect_ratio = "1:1"  # Default aspect ratio
-    if resolution:
-        width, height = map(int, resolution.split('x'))
-        if width > height:
-            aspect_ratio = "16:9"
-        elif height > width:
-            aspect_ratio = "9:16"
-
+  
     headers = {
         'Content-Type': 'application/json',
         'x-key': BFL_API_KEY
@@ -46,7 +39,6 @@ def generate_variants(base_image, resolution, prompt):
     data = {
         'prompt': prompt,
         'input_image': base_image,
-        'aspect_ratio': aspect_ratio,
         'output_format': 'jpeg',
         'safety_tolerance': 2
     }
@@ -54,6 +46,9 @@ def generate_variants(base_image, resolution, prompt):
         res= {}
         services = [("Facebook", "1:1"), ("Instagram","16:9"), ("TikTok", "9:16")]
         for service, asp in services:
+            if service.lower() not in platforms:
+                continue
+
             data['aspect_ratio'] = asp
             response = requests.post(BFL_API_URL, headers=headers, json=data)
             response.raise_for_status()
@@ -255,7 +250,7 @@ def scrape_and_refine():
         scraped_content = extract_content(url)
         
         # Refine the prompt using LiteLLM
-        messages = [{"role": "system", "content": "You are a stable diffusion prompt engineer. Create a short image generation prompt to generate an advertising asset that could be used to promote the following blog post:"},
+        messages = [{"role": "system", "content": "You are a stable diffusion prompt engineer creating assets for a social media campaign. Create a short image generation prompt to generate an advertising asset that could be used to promote the following blog post:"},
                     {"role": "user", "content": scraped_content['content']}]
         try:
             response = litellm.completion(
@@ -313,7 +308,6 @@ def generate():
     else:
         base_image = fetch_and_encode_image_url(data.get('image_url'))
 
-    resolution = data.get('resolution', '512x512')
     context = data.get('context')
     modify = data.get('prompt')
     ageRange = data.get('ageRange', '18-35')
@@ -321,11 +315,17 @@ def generate():
     location = data.get('location', 'USA')
     interests = data.get('interests', 'any')
     freeformText = data.get('freeformText', '')
-    prompt = f"{context} involving a person from or content culturally relevant to {location} {gender} gender, {interests} interests and {ageRange} years old. {freeformText}"
+    if freeformText:
+        freeformText = f"Important context: {freeformText}."
+
+    platforms = [x.lower() for x in json.loads(data.get('platforms'))]
+    prompt = f"Social media advertising asset"
     if modify:
-        prompt += f"Important: Modify the image as follows: {modify}"
+        prompt += f" modified as follows: {modify}"
+    else:
+        prompt += f" themed '{context}' involving a person or content relevant to {location}, {gender}, {interests} interests and {ageRange} years old. {freeformText} The base image may be used for palettes, fonts, and theme. This is not a website design, this is an advertising image"
     
-    variants = generate_variants(base_image, resolution, prompt)
+    variants = generate_variants(base_image, platforms, prompt)
     print(prompt)
     return jsonify({
         'media_kit': variants,

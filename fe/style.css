@@ -1,10 +1,10 @@
 :root {
-  --primary-color: #00ffff;
+  --primary-color: #C0ffff;
   --secondary-color: #0066ff;
   --accent-color: #ff0080;
   --bg-dark: #0a0a0f;
   --bg-darker: #050508;
-  --bg-card: #1a1a2e;
+  --bg-card: #0f0f1e;
   --text-primary: #ffffff;
   --text-secondary: #b8b8d4;
   --text-muted: #6c6c8a;
@@ -34,7 +34,6 @@ body {
   padding: 2rem;
   text-align: center;
   background: linear-gradient(180deg, var(--bg-darker) 0%, transparent 100%);
-  border-bottom: 1px solid var(--border-color);
 }
 
 .logo {
@@ -119,7 +118,6 @@ body {
 .input-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
   padding: 1.5rem;
   box-shadow: var(--shadow-card);
   transition: all 0.3s ease;
@@ -127,7 +125,6 @@ body {
 
 .input-card:hover {
   border-color: var(--primary-color);
-  box-shadow: var(--shadow-glow);
 }
 
 .input-card h3 {
@@ -702,7 +699,6 @@ body {
   align-items: center;
   margin-bottom: 2rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
 }
 
 .results-header h2 {

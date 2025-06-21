@@ -53,38 +53,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  function getFormData() {
+    const formData = new FormData();
+    const imageFile = imageInput.files[0];
+    formData.append('image', imageFile);
+    formData.append("context", analyzeText.value);
+    
+    // Add target demographics
+    formData.append('ageRange', document.getElementById('ageRange').value);
+    formData.append('gender', document.getElementById('gender').value);
+    formData.append('location', document.getElementById('location').value);
+
+    // Get selected interests
+    const selectedInterests = Array.from(document.querySelectorAll('input[name="interest"]:checked'))
+        .map(el => el.value)
+        .join(', ');
+    formData.append('interests', selectedInterests);
+    formData.append('freeformText', document.getElementById('freeformText').value);
+    return formData;
+  }
+  
   generateBtn.addEventListener('click', async () => {
     loadingOverlay.style.display = 'flex';
     loadingText.textContent = 'Generating creatives...';
 
-    const imageFile = imageInput.files[0];
-    let prompt = document.getElementById('brandUrl').value;
-    const freeformText = document.getElementById('freeformText').value;
-    const interests = Array.from(document.querySelectorAll('.interest-tag.active'))
-        .map(el => el.dataset.interest)
-        .join(', ');
-
-
-    let refinedPrompt = prompt + " " + freeformText + " Interests: " + interests;
-    
-    try {
-      const refinedPromptResponse = await fetch(`/scrape_and_refine?url=${prompt}`);
-      if (refinedPromptResponse.ok) {
-        const refinedPromptData = await refinedPromptResponse.json();
-        refinedPrompt = refinedPromptData.prompt;
-        document.getElementById('brandUrl').value = refinedPrompt;
-      } else {
-        console.warn("Failed to get refined prompt, using original URL");
-      }
-    } catch (error) {
-      console.error("Error getting refined prompt:", error);
-    }
-
-    const formData = new FormData();
-    formData.append('image', imageFile);
-    formData.append('prompt', refinedPrompt);
-    formData.append("context", analyzeText.value);
-
+    const formData = getFormData();
     try {
       const response = await fetch('http://localhost:5000/generate', {
         method: 'POST',
@@ -129,13 +122,14 @@ document.addEventListener('DOMContentLoaded', () => {
         creativeGrid.textContent = "Failed to generate creatives.";
       }
 
-      resultsSection.style.display = 'block';
-      loadingOverlay.style.display = 'none';
 
     } catch (error) {
       console.error('Error:', error);
       loadingText.textContent = 'Error generating creatives.';
     }
+    resultsSection.style.display = 'block';
+    loadingOverlay.style.display = 'none';
+
   });
 
   document.getElementById('modifyBtn').addEventListener('click', async () => {
@@ -145,8 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadingOverlay.style.display = 'flex';
     loadingText.textContent = 'Modifying image...';
 
-    const formData = new FormData();
-    formData.append('image', imageFile);
+    let formData = getFormData();
     formData.append('prompt', modifyPrompt);
 
     try {

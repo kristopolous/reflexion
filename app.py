@@ -4,6 +4,7 @@ import requests
 import os
 import uuid
 from flask_cors import CORS
+import base64, time
 from urllib.parse import urlparse
 
 import litellm
@@ -28,7 +29,7 @@ def serve_static(path):
 def serve_image(image_id):
     return send_from_directory('images', image_id)
 
-def generate_variants(base_image, resolution, prompt="A fantastic image"):
+def generate_variants(base_image, resolution, prompt):
     """Generate platform-specific variants using Black Forest Labs API"""
     aspect_ratio = "1:1"  # Default aspect ratio
     if resolution:
@@ -49,28 +50,50 @@ def generate_variants(base_image, resolution, prompt="A fantastic image"):
         'output_format': 'jpeg',
         'safety_tolerance': 2
     }
-
     try:
-        response = requests.post(BFL_API_URL, headers=headers, json=data)
-        response.raise_for_status()
-        result = response.json()
-        task_id = result['id']
-        polling_url = result['polling_url']
+        imgStack = []
+        for asp in "1:1", "16:9", "9:16":
+            data['aspect_ratio'] = asp
+            response = requests.post(BFL_API_URL, headers=headers, json=data)
+            response.raise_for_status()
+            result = response.json()
+            task_id = result['id']
+            polling_url = result['polling_url']
 
-        # Placeholder: Implement polling logic to get the final image URL
-        # For simplicity, generate a mock image and save it to the images directory
-        image_id = uuid.uuid4().hex + ".jpg"
-        mock_image_path = os.path.join("images", image_id)
-        os.makedirs("images", exist_ok=True)
-        with open(mock_image_path, "wb") as f:
-            f.write(requests.get("https://picsum.photos/400/400").content) # Save a placeholder image
+            # --- Poll until image is ready ---
+            for attempt in range(20):  # wait up to ~20s
+                poll_resp = requests.get(polling_url, headers=headers)
+                poll_resp.raise_for_status()
+                poll_data = poll_resp.json()
+                print(poll_data)
 
-        image_url = f"/images/{image_id}"
+                if poll_data.get("result") is not None:
+                    image_url = poll_data["result"].get("sample")
+                    break
+                elif poll_data.get("status") == "failed":
+                    raise Exception("Image generation failed")
+                time.sleep(1.0)
+            else:
+                raise Exception("Polling timed out")
+
+            # --- Download and store the final image ---
+            image_id = uuid.uuid4().hex + ".jpg"
+            os.makedirs("images", exist_ok=True)
+            image_path = os.path.join("images", image_id)
+
+            img_resp = requests.get(image_url)
+            img_resp.raise_for_status()
+
+            with open(image_path, "wb") as f:
+                f.write(img_resp.content)
+
+            image_url = f"/images/{image_id}"
+            imgStack.append(image_url)
 
         return {
-            'facebook': {'url': image_url, 'format': 'story', 'description': 'Facebook ad'},
-            'instagram': {'url': image_url, 'format': 'reel', 'description': 'Instagram ad'},
-            'tiktok': {'url': image_url, 'format': 'video', 'description': 'TikTok ad'}
+            'facebook': {'url': imgStack[0], 'format': 'story', 'description': 'Facebook ad'},
+            'instagram': {'url': imgStack[1], 'format': 'reel', 'description': 'Instagram ad'},
+            'tiktok': {'url': imgStack[2], 'format': 'video', 'description': 'TikTok ad'}
         }
 
     except requests.exceptions.RequestException as e:
@@ -235,7 +258,7 @@ def scrape_and_refine():
         scraped_content = extract_content(url)
         
         # Refine the prompt using LiteLLM
-        messages = [{"role": "system", "content": "You are a marketing expert.  Create a short image generation prompt to generate an image relevant to the following blog post:"},
+        messages = [{"role": "system", "content": "You are a stable diffusion prompt engineer. Create a short image generation prompt to generate an advertising asset that could be used to promote the following blog post:"},
                     {"role": "user", "content": scraped_content['content']}]
         try:
             response = litellm.completion(
@@ -264,20 +287,33 @@ def api_extract():
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
+def encode_image_to_data_uri(image_file):
+    # Read the file into memory
+    image_bytes = image_file.read()
 
-
+    # Encode to base64
+    encoded = base64.b64encode(image_bytes).decode('utf-8')
+    return encoded
 
 @app.route('/generate', methods=['POST'])
 def generate():
-    return jsonify({})
     data = request.form  # Access form data instead of json
     
-    base_image = data.get('image', 'baseline.png')
-    resolution = data.get('resolution', '1080x1920')
+    base_image = request.files.get('image')
+    if base_image:
+        base_image = encode_image_to_data_uri(base_image)
+    resolution = data.get('resolution', '512x512')
+    context = data.get('context')
     prompt = data.get('prompt', "A fantastic image")
-    
+    ageRange = data.get('ageRange', '18-35')
+    gender = data.get('gender', 'any')
+    location = data.get('location', 'USA')
+    interests = data.get('interests', 'any')
+    freeformText = data.get('freeformText', '')
+    prompt = f"{context} involving a person from or content culturally relevant to {location} {gender} gender, {interests} interests and {ageRange} years old. {freeformText}"
+
     variants = generate_variants(base_image, resolution, prompt)
-    
+    print(prompt)
     return jsonify({
         'media_kit': variants,
         'status': 'ready',

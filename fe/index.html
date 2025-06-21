@@ -141,7 +141,7 @@
               <div class="demographics-grid">
                 <div class="demo-group">
                   <label>Age Range</label>
-                  <select id="ageRange">
+                  <select id="ageRange" name="ageRange">
                     <option value="18-24">18-24</option>
                     <option value="25-34" selected>25-34</option>
                     <option value="35-44">35-44</option>
@@ -152,7 +152,7 @@
                 
                 <div class="demo-group">
                   <label>Gender</label>
-                  <select id="gender">
+                  <select id="gender" name="gender">
                     <option value="all" selected>All</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
@@ -163,25 +163,49 @@
                 <div class="demo-group">
                   <label>Interests</label>
                   <div class="interest-tags">
-                    <span class="interest-tag" data-interest="tech">Tech</span>
-                    <span class="interest-tag" data-interest="fashion">Fashion</span>
-                    <span class="interest-tag" data-interest="fitness">Fitness</span>
-                    <span class="interest-tag" data-interest="travel">Travel</span>
-                    <span class="interest-tag" data-interest="food">Food</span>
-                    <span class="interest-tag" data-interest="gaming">Gaming</span>
-                    <span class="interest-tag" data-interest="business">Business</span>
-                    <span class="interest-tag" data-interest="art">Art</span>
+                    <label class="interest-option">
+                      <input type="checkbox" name="interest" value="tech">
+                      <span>Tech</span>
+                    </label>
+                    <label class="interest-option">
+                      <input type="checkbox" name="interest" value="fashion">
+                      <span>Fashion</span>
+                    </label>
+                    <label class="interest-option">
+                      <input type="checkbox" name="interest" value="fitness">
+                      <span>Fitness</span>
+                    </label>
+                    <label class="interest-option">
+                      <input type="checkbox" name="interest" value="travel">
+                      <span>Travel</span>
+                    </label>
+                    <label class="interest-option">
+                      <input type="checkbox" name="interest" value="food">
+                      <span>Food</span>
+                    </label>
+                    <label class="interest-option">
+                      <input type="checkbox" name="interest" value="gaming">
+                      <span>Gaming</span>
+                    </label>
+                    <label class="interest-option">
+                      <input type="checkbox" name="interest" value="business">
+                      <span>Business</span>
+                    </label>
+                    <label class="interest-option">
+                      <input type="checkbox" name="interest" value="art">
+                      <span>Art</span>
+                    </label>
                   </div>
                 </div>
                 
                 <div class="demo-group">
                   <label>Location</label>
-                  <select id="location">
+                  <select id="location" name="location">
                     <option value="global" selected>Global</option>
-                    <option value="north-america">North America</option>
+                    <option value="north-america">North America</America</option>
                     <option value="europe">Europe</option>
-                    <option value="asia">Asia</option>
-                    <option value="australia">Australia</option>
+                    <option value="asia">Asia</Asia</option>
+                    <option value="australia">Australia</Australia</option>
                     <option value="south-america">South America</option>
                     <option value="africa">Africa</option>
                   </select>

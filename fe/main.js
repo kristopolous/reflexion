@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   const uploadArea = document.getElementById('uploadArea');
+  const analyzeText = document.getElementById('analyzeText');
   const imageInput = document.getElementById('imageInput');
   const imagePreview = document.getElementById('imagePreview');
   const previewImg = document.getElementById('previewImg');
@@ -41,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch(`/scrape_and_refine?url=${url}`);
       if (response.ok) {
         const data = await response.json();
-        brandUrlInput.value = data.prompt;
+        analyzeText.value = data.prompt;
       } else {
         console.error('Error:', response.status);
         alert('Failed to analyze URL.');
@@ -63,11 +64,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .map(el => el.dataset.interest)
         .join(', ');
 
-    if (!imageFile) {
-      alert('Please upload an image.');
-      loadingOverlay.style.display = 'none';
-      return;
-    }
 
     let refinedPrompt = prompt + " " + freeformText + " Interests: " + interests;
     
@@ -87,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formData = new FormData();
     formData.append('image', imageFile);
     formData.append('prompt', refinedPrompt);
+    formData.append("context", analyzeText.value);
 
     try {
       const response = await fetch('http://localhost:5000/generate', {
@@ -144,11 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('modifyBtn').addEventListener('click', async () => {
     const modifyPrompt = document.getElementById('modifyPrompt').value;
     const imageFile = imageInput.files[0];
-
-    if (!imageFile) {
-      alert('Please upload an image first.');
-      return;
-    }
 
     loadingOverlay.style.display = 'flex';
     loadingText.textContent = 'Modifying image...';

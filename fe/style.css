@@ -224,8 +224,12 @@ body {
   font-size: 0.9rem;
   font-weight: 500;
 }
+#analyzeText {
+  width: 100%;
+  height: 10rem;
+}
 
-.demo-group select, .demo-group textarea {
+.demo-group select, .demo-group textarea, textarea {
   background: var(--bg-dark);
   border: 1px solid var(--border-color);
   border-radius: 6px;

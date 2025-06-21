@@ -45,7 +45,6 @@ def generate_variants(base_image, resolution, prompt="A fantastic image"):
     data = {
         'prompt': prompt,
         'input_image': base_image,
-        'seed': 42,
         'aspect_ratio': aspect_ratio,
         'output_format': 'jpeg',
         'safety_tolerance': 2
@@ -270,6 +269,7 @@ def api_extract():
 
 @app.route('/generate', methods=['POST'])
 def generate():
+    return jsonify({})
     data = request.form  # Access form data instead of json
     
     base_image = data.get('image', 'baseline.png')

@@ -91,9 +91,9 @@ def generate_variants(base_image, resolution, prompt):
             imgStack.append(image_url)
 
         return {
-            'facebook': {'url': imgStack[0], 'format': 'story', 'description': 'Facebook ad'},
-            'instagram': {'url': imgStack[1], 'format': 'reel', 'description': 'Instagram ad'},
-            'tiktok': {'url': imgStack[2], 'format': 'video', 'description': 'TikTok ad'}
+            'Facebook': {'url': imgStack[0], 'format': 'story', 'description': 'Facebook ad'},
+            'Instagram': {'url': imgStack[1], 'format': 'reel', 'description': 'Instagram ad'},
+            'TikTok': {'url': imgStack[2], 'format': 'video', 'description': 'TikTok ad'}
         }
 
     except requests.exceptions.RequestException as e:

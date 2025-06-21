@@ -173,13 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
           container.appendChild(img);
 
-          // Set aspect ratio based on platform
-          if (item.format === 'story' || item.format === 'reel') {
-            container.style.maxWidth = '200px'; // Adjust as needed
-          } else {
-            container.style.maxWidth = '200px'; // Adjust as needed
-          }
-
+   
           creativeGrid.appendChild(container);
         });
       } else {

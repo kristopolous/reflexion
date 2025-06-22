@@ -250,7 +250,7 @@ def scrape_and_refine():
         scraped_content = extract_content(url)
         
         # Refine the prompt using LiteLLM
-        messages = [{"role": "system", "content": "You are a stable diffusion prompt engineer creating assets for a social media campaign. Create a short image generation prompt to generate an advertising asset that could be used to promote the following blog post:"},
+        messages = [{"role": "system", "content": "You are a stable diffusion prompt engineer creating assets for a social media campaign. Create a short image generation prompt to generate an advertising asset that could be used to promote the following blog post. Leave out descriptions of clothing, age, and gender:"},
                     {"role": "user", "content": scraped_content['content']}]
         try:
             response = litellm.completion(
@@ -319,11 +319,11 @@ def generate():
         freeformText = f"Important context: {freeformText}."
 
     platforms = [x.lower() for x in json.loads(data.get('platforms'))]
-    prompt = f"Social media advertising asset"
+    prompt = f"Social media advertising creative"
     if modify:
         prompt += f" modified as follows: {modify}"
     else:
-        prompt += f" themed '{context}' involving a person or content relevant to {location}, {gender}, {interests} interests and {ageRange} years old. {freeformText} The base image may be used for palettes, fonts, and theme. This is not a website design, this is an advertising image"
+        prompt += f" themed '{context}' involving a person or content relevant to {location}, {gender}, {interests} interests and {ageRange} years old. {freeformText} The base image may be used for palettes, fonts, and theme. This is not a website design, NO hamburger menus, No Buttons. This is an advertising image"
     
     variants = generate_variants(base_image, platforms, prompt)
     print(prompt)

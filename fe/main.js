@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const url = brandUrlInput.value;
 
     try {
-      const response = await fetch(`/scrape_and_refine?url=${url}`);
+      const response = await fetch(`scrape_and_refine?url=${url}`);
       if (response.ok) {
         const data = await response.json();
         analyzeText.value = data.prompt;
